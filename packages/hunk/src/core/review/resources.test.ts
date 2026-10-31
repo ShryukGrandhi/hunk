@@ -60,18 +60,20 @@ describe("resource materialization state", () => {
     ).toBe(true);
   });
 
-  test("narrows a materialized descriptor to concrete measurements", () => {
-    const measured: ReviewResourceDescriptorV1 = {
-      ...descriptor,
-      byteLength: 10,
-      digest: "a".repeat(64),
-    };
-    if (!isMaterializedReviewResource(measured)) {
+  /** Reads measurements through the predicate alone, so only its narrowing can typecheck them. */
+  function readTestMeasurements(resource: ReviewResourceDescriptorV1) {
+    if (!isMaterializedReviewResource(resource)) {
       throw new Error("expected a materialized descriptor");
     }
-    const byteLength: number = measured.byteLength;
-    const digest: string = measured.digest;
-    expect({ byteLength, digest }).toEqual({ byteLength: 10, digest: "a".repeat(64) });
+
+    const byteLength: number = resource.byteLength;
+    const digest: string = resource.digest;
+    return { byteLength, digest };
+  }
+
+  test("narrows a materialized descriptor to concrete measurements", () => {
+    const measured = { ...descriptor, byteLength: 10, digest: "a".repeat(64) };
+    expect(readTestMeasurements(measured)).toEqual({ byteLength: 10, digest: "a".repeat(64) });
   });
 });
 
